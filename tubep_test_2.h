@@ -16,11 +16,12 @@
 #define SPEED_DEFAUT 120    //van toc dong co khi hoat dong binh thuong
 #define ERROR_SPEED 50      //sai so cho phep cua van toc, neu nam ngoai khoang nay thi coi nhu co vat can
 
-#define L1 D0   //D0
-#define L2 D5   //D5
-#define R1 D1    //D1
-#define R2 D2    //D2
-
+#define L1 16   //D0
+#define L2 14   //D5
+#define R1 5    //D1
+#define R2 4    //D2
+#define LEDTEST D4  //led on chip
+#define BUTTON 13
 
 #define RESPONSE_LENGTH 512     //do dai data nhan ve tu tablet
 #define EEPROM_WIFI_SSID_START 0
@@ -66,6 +67,8 @@ void StartNormalSever();
 void setPulMotor();
 void caculate_Speed();
 void tickerupdate();
+void buttonClick();
+
 
 //Config Mode
 void checkButtonConfigClick();      //kiem tra button
@@ -94,6 +97,10 @@ float speed;
 
 String esid, epass, eip;
 bool Flag_Normal_Mode = true;
+
+bool forward = true;
+bool statusStop = true;
+bool clickbutton = false;
 // unsigned long Pul_Motor;
 // unsigned long test_time, time_start_speed;
 

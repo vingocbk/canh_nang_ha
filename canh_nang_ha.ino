@@ -14,7 +14,10 @@ void handleRoot() {
 
 
 void GoUp(){
-    server.send(200, "text/html", "{\"status\":\"success\"}");
+    if(clickbutton == false){
+        server.send(200, "text/html", "{\"status\":\"success\"}");
+    }
+    
     ECHOLN("go_up");
     digitalWrite(PIN_LOA, HIGH);
     digitalWrite(L2, LOW);
@@ -25,11 +28,15 @@ void GoUp(){
     digitalWrite(R2, HIGH);
     delay(300);
     digitalWrite(PIN_LOA, LOW);
+    forward = false;
+    statusStop = false;
     
 }
 
 void GoDown(){
-    server.send(200, "text/html", "{\"status\":\"success\"}");
+    if(clickbutton == false){
+        server.send(200, "text/html", "{\"status\":\"success\"}");
+    }
     ECHOLN("go_down!");
     digitalWrite(PIN_LOA, HIGH);
     digitalWrite(L1, LOW);
@@ -40,18 +47,21 @@ void GoDown(){
     
     delay(300);
     digitalWrite(PIN_LOA, LOW);
-    
+    forward = true;
+    statusStop = false;
 }
 
 void Stop(){
+    if(clickbutton == false){
+        server.send(200, "text/html", "{\"status\":\"success\"}");
+    }
     digitalWrite(PIN_LOA, HIGH);
     digitalWrite(L1, LOW);
     digitalWrite(R2, LOW);
     digitalWrite(L2, LOW);
     digitalWrite(R1, LOW);
     ECHOLN("Stop");
-    
-    server.send(200, "text/html", "{\"status\":\"success\"}");
+    statusStop = true;
     delay(500);
     digitalWrite(PIN_LOA, LOW);
     //tickerSetMotor.stop();
@@ -214,6 +224,7 @@ bool testWifi(String esid, String epass) {
             ECHOLN("\rWifi connected!");
             ECHO("Local IP: ");
             ECHOLN(WiFi.localIP());
+            digitalWrite(LEDTEST, LOW);
             return true;
         }
         delay(500);
@@ -343,6 +354,17 @@ void StartNormalSever(){
     ECHOLN("HTTP server started");
 }
 
+void buttonClick(){  
+    if(statusStop == false){
+        Stop();
+    }
+    else if(forward == false ){
+      GoDown();
+    }else {
+      GoUp();
+    }
+    delay(500);
+}
 
 void tickerupdate(){
     tickerSetApMode.update();
@@ -352,14 +374,17 @@ void setup() {
     pinMode(LED_TEST_AP, OUTPUT);
     pinMode(PIN_CONFIG, INPUT);
     pinMode(PIN_LOA, OUTPUT);
+    pinMode(BUTTON, INPUT_PULLUP);
     pinMode(R1, OUTPUT);
     pinMode(R2, OUTPUT);
     pinMode(L1, OUTPUT);
     pinMode(L2, OUTPUT);
+    pinMode(LEDTEST, OUTPUT);
     digitalWrite(L1, LOW);
     digitalWrite(L2, LOW);
     digitalWrite(R1, LOW);
     digitalWrite(R2, LOW);
+    digitalWrite(LEDTEST, HIGH);
     // pinMode(PIN_LOA, INPUT_PULLUP);
     Serial.begin(115200);
     EEPROM.begin(512);
@@ -372,10 +397,16 @@ void setup() {
 
 void loop() {
     if (Flag_Normal_Mode == true && WiFi.status() != WL_CONNECTED){
+        digitalWrite(LEDTEST, HIGH);
         if (testWifi(esid, epass)){
             StartNormalSever();
         } 
     } 
+//    if(digitalRead(BUTTON) == LOW){
+//        clickbutton = true;
+//        buttonClick();
+//        clickbutton = false;
+//    }
     checkButtonConfigClick();
     tickerupdate();
     server.handleClient();
